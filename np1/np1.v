@@ -32,7 +32,7 @@ module np1
 	output wire       sramLb,
 	output wire       sramOe,
 	output wire       sramWe,
-	inout  wire[ 7:0] sramDQ,
+	inout  wire[15:8] sramDQ,
 	output wire[20:0] sramA,
 
 	output wire       stm,
@@ -83,8 +83,10 @@ reg[17:0] palette[0:15];
 initial $readmemb("../hdl/palette18.bin", palette);
 
 wire[ 1:0] cepix = { cep2x, cep1x };
+wire[ 1:0] iblank = { vblank, hblank };
 wire[ 1:0] isync = { vsync, hsync };
-wire[17:0] irgb = blank ? 1'd0 : model ? { r,r,{4{r&i}}, g,g,{4{g&i}}, b,b,{4{b&i}} } : palette[{ i, r, g, b }];
+wire[17:0] irgb = model ? { r,r,{4{r&i}}, g,g,{4{g&i}}, b,b,{4{b&i}} } : palette[{ i, r, g, b }];
+wire[ 1:0] blank;
 
 wire strb;
 wire make;
@@ -115,9 +117,11 @@ demistify controller
 	.sdcard (sdcard ),
 	.reset  (reset  ),
 	.nmi    (nmi    ),
+	.cepix  (cepix  ),
+	.iblank (iblank ),
 	.isync  (isync  ),
 	.irgb   (irgb   ),
-	.cepix  (cepix  ),
+	.oblank (blank  ),
 	.osync  (sync   ),
 	.orgb   (rgb    ),
 	.ps2k   (ps2k   ),
@@ -145,7 +149,8 @@ demistify controller
 
 //-------------------------------------------------------------------------------------------------
 
-wire blank;
+wire hblank;
+wire vblank;
 wire hsync;
 wire vsync;
 
@@ -182,7 +187,8 @@ zx Zx
 	.power  (power  ),
 	.reset  (reset  ),
 	.nmi    (nmi    ),
-	.blank  (blank  ),
+	.hblank (hblank ),
+	.vblank (vblank ),
 	.hsync  (hsync  ),
 	.vsync  (vsync  ),
 	.r      (r      ),
@@ -245,8 +251,8 @@ dprs #(16) Dpr
 
 assign memQ1 = sramDQ;
 
-assign sramUb = 1'b1;
-assign sramLb = 1'b0;
+assign sramUb = 1'b0;
+assign sramLb = 1'b1;
 assign sramOe = init ? !memRd :  1'b1;
 assign sramWe = init ? !memWr : !iniW;
 assign sramDQ = sramWe ? 8'bZ : init ? memD1 : iniD;

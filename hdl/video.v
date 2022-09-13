@@ -14,7 +14,8 @@ module video
 	input  wire[ 7:0] d,
 	output reg [ 7:0] q,
 
-	output wire       blank,
+	output wire       hblank,
+	output wire       vblank,
 	output wire       hsync,
 	output wire       vsync,
 	output wire       r,
@@ -81,11 +82,6 @@ wire fbLoad = dataEnable && hCount[3] && hCount[0];
 wire fbReset = hCount[3:0] == 1;
 always @(posedge clock) if(ce) if(fbLoad) q <= d; else if(fbReset) q <= 8'hFF;
 
-//-------------------------------------------------------------------------------------------------
-
-wire hBlank = hCount >= 320 && hCount < 416;
-wire vBlank = vCount >= 248 && vCount < 256;
-
 wire dataSelect = dataOutput[7] ^ (fCount[4] & attrOutput[7]);
 
 //-------------------------------------------------------------------------------------------------
@@ -93,7 +89,9 @@ wire dataSelect = dataOutput[7] ^ (fCount[4] & attrOutput[7]);
 assign irq = !(vCount == 248 && hCount >= irqBeg && hCount < irqEnd);
 assign cn = dataEnable && (hCount[3] || hCount[2]);
 
-assign blank = hBlank | vBlank;
+assign hblank = hCount >= 320 && hCount < 416;
+assign vblank = vCount >= 248 && vCount < 256;
+
 assign hsync = hCount >= 344 && hCount < 376;
 assign vsync = vCount >= 248 && vCount < 252;
 

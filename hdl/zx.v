@@ -11,7 +11,8 @@ module zx
 	input  wire       reset,
 	input  wire       nmi,
 
-	output wire       blank,  // video
+	output wire       hblank,  // video
+	output wire       vblank,
 	output wire       hsync,
 	output wire       vsync,
 	output wire       r,
@@ -222,7 +223,8 @@ video Video
 	.a      (vduA   ),
 	.d      (vduD   ),
 	.q      (vduQ   ),
-	.blank  (blank  ),
+	.hblank (hblank ),
+	.vblank (vblank ),
 	.hsync  (hsync  ),
 	.vsync  (vsync  ),
 	.r      (r      ),

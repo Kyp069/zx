@@ -18,11 +18,14 @@ module demistify
 	output wire       boot,
 	output wire       nmi,
 
-	input  wire[ 1:0] cepix,
-	input  wire[ 1:0] isync,
+	input  wire[     1:0] cepix,
+
+	input  wire[     1:0] iblank,
+	input  wire[     1:0] isync,
 	input  wire[RGBW-1:0] irgb,
 
-	output wire[ 1:0] osync,
+	output wire[     1:0] oblank,
+	output wire[     1:0] osync,
 	output wire[RGBW-1:0] orgb,
 
 	inout  wire[ 1:0] ps2k,
@@ -125,15 +128,15 @@ wire[8:0] mouse_x;
 wire[8:0] mouse_y;
 wire[7:0] mouse_f;
 
-wire       usdRd     = vsdRd;
-wire       usdWr     = vsdWr;
+wire       usdRd     ;
+wire       usdWr     ;
 wire       usdAck    ;
 wire       usdAckConf;
-wire[31:0] usdLba    = vsdLba;
-wire       usdConf   = vsdConf;
-wire       usdSdHc   = vsdSdhc;
+wire[31:0] usdLba    ;
+wire       usdConf   ;
+wire       usdSdHc   ;
 wire[ 8:0] usdA      ;
-wire[ 7:0] usdD      = vsdD;
+wire[ 7:0] usdD      ;
 wire[ 7:0] usdQ      ;
 wire       usdStrbQ  ;
 wire[63:0] usdSize   ;
@@ -268,11 +271,13 @@ scandoubler #(.RGBW(RGBW)) Scandoubler
 	.clock  (clock   ),
 	.enable (!rgb    ),
 	.ice    (cepix[0]),
+	.iblank (iblank  ),
 	.isync  (isync   ),
 	.irgb   (sdbirgb ),
 	.oce    (cepix[1]),
-	.osync  (osync),
-	.orgb   (orgb )
+	.oblank (oblank  ),
+	.osync  (osync   ),
+	.orgb   (orgb    )
 );
 
 //-------------------------------------------------------------------------------------------------
@@ -297,38 +302,23 @@ assign mbtns = { mouse_f[3], mouse_f[0], mouse_f[1] };
 
 //-------------------------------------------------------------------------------------------------
 
-wire       vsdRd      ;
-wire       vsdWr      ;
-wire       vsdAck     = usdAck;
-wire       vsdAckConf = usdAckConf;
-wire[31:0] vsdLba     ;
-wire       vsdConf    ;
-wire       vsdSdhc    ;
-wire[63:0] vsdSize    = usdSize;
-wire       vsdMntd    = usdMntd;
-wire[ 8:0] vsdA       = usdA;
-wire[ 7:0] vsdD       ;
-wire[ 7:0] vsdQ       = usdQ;
-wire       vsdStrbQ   = usdStrbQ;
-
 sd_card sd_card
 (
 	.clk_sys     (clock     ),
-
-	.sd_rd       (vsdRd     ),
-	.sd_wr       (vsdWr     ),
-	.sd_ack      (vsdAck    ),
-	.sd_ack_conf (vsdAckConf),
-	.sd_lba      (vsdLba    ),
-	.sd_conf     (vsdConf   ),
-	.sd_sdhc     (vsdSdhc   ),
-	.img_size    (vsdSize   ),
-	.img_mounted (vsdMntd   ),
+	.sd_rd       (usdRd     ),
+	.sd_wr       (usdWr     ),
+	.sd_ack      (usdAck    ),
+	.sd_ack_conf (usdAckConf),
+	.sd_lba      (usdLba    ),
+	.sd_conf     (usdConf   ),
+	.sd_sdhc     (usdSdHc   ),
+	.img_size    (usdSize   ),
+	.img_mounted (usdMntd   ),
 	.sd_busy     (          ),
-	.sd_buff_addr(vsdA      ),
-	.sd_buff_din (vsdD      ),
-	.sd_buff_dout(vsdQ      ),
-	.sd_buff_wr  (vsdStrbQ  ),
+	.sd_buff_addr(usdA      ),
+	.sd_buff_din (usdD      ),
+	.sd_buff_dout(usdQ      ),
+	.sd_buff_wr  (usdStrbQ  ),
 	.allow_sdhc  (1'b1      ),
 	.sd_cs       (sdvCs     ),
 	.sd_sck      (sdvCk     ),

@@ -17,11 +17,14 @@ module controller
 	output wire       boot,
 	output wire       nmi,
 
-	input  wire[ 1:0] cepix,
-	input  wire[ 1:0] isync,
-	input  wire[RGBW-1:0] irgb,
+	input  wire[     1:0] cepix,
 
-	output wire[ 1:0] osync,
+	input  wire[     1:0] iblank,
+	input  wire[     1:0] isync,
+	input  wire[RGBW-1:0] irgb,
+    
+	output wire[     1:0] oblank,
+	output wire[     1:0] osync,
 	output wire[RGBW-1:0] orgb,
 
 	inout  wire[ 1:0] ps2k,
@@ -60,16 +63,15 @@ scandoubler #(.RGBW(RGBW)) Scandoubler
 	.clock  (clock   ),
 	.enable (vga     ),
 	.ice    (cepix[0]),
+	.iblank (iblank  ),
 	.isync  (isync   ),
 	.irgb   (irgb    ),
 	.oce    (cepix[1]),
+	.oblank (oblank  ),
 	.osync  (osync   ),
 	.orgb   (orgb    )
 );
-/*
-assign osync = { 1'b1, ~^isync };
-assign orgb = irgb;
-*/
+
 //-------------------------------------------------------------------------------------------------
 
 ps2k keyboard(clock, ps2k, strb, make, code);
