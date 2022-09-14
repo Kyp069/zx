@@ -217,7 +217,7 @@ user_io #(.STRLEN(99), .SD_IMAGES(1)) user_io
 	.serial_strobe (1'd0)
 );
 
-assign boot = !status[9];
+assign boot = F11 && (ctrl || alt || bspc) && !status[9];
 
 //-------------------------------------------------------------------------------------------------
 
@@ -230,7 +230,7 @@ assign sdcard = status[5:4] == 0 || status[5:4] == 1;
 reg modeld, modelp;
 always @(posedge clock) begin modeld <= model; modelp <= modeld != model; end
 
-assign reset = power && init && F9 && btn[0] && !status[1] && !modelp;
+assign reset = power && init && F9 && (ctrl || alt || del) && btn[0] && !status[1] && !modelp;
 assign nmi = F5 && btn[1] && !status[2];
 
 //-------------------------------------------------------------------------------------------------
@@ -286,12 +286,18 @@ assign strb = keyStrobe;
 assign make = !keyPressed;
 assign code = keyCode;
 
-reg F9 = 1'b1;
-reg F5 = 1'b1;
+reg F5 = 1'b1, F9 = 1'b1, F11 = 1'b1;
+reg alt = 1'b1, del = 1'b1, ctrl = 1'b1, bspc = 1'b1;
+
 always @(posedge clock) if(strb)
 	case(code)
 		8'h01: F9 <= make;
 		8'h03: F5 <= make;
+		8'h78: F11 <= make;
+		8'h11: alt <= make;
+		8'h71: del <= make;
+		8'h14: ctrl <= make;
+		8'h66: bspc <= make;
 	endcase
 
 //-------------------------------------------------------------------------------------------------

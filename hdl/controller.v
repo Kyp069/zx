@@ -76,15 +76,18 @@ scandoubler #(.RGBW(RGBW)) Scandoubler
 
 ps2k keyboard(clock, ps2k, strb, make, code);
 
-reg F1 = 1'b1;
-reg F2 = 1'b1;
-reg F4 = 1'b1;
-reg F5 = 1'b1;
-reg F9 = 1'b1;
+reg F1 = 1'b1, F2 = 1'b1, F4 = 1'b1, F5 = 1'b1, F9 = 1'b1, F11 = 1'b1;
+reg alt = 1'b1, del = 1'b1, ctrl = 1'b1, bspc = 1'b1;
+
 always @(posedge clock) if(strb)
 	case(code)
 		8'h03: F5 <= make;
 		8'h01: F9 <= make;
+		8'h78: F11 <= make;
+		8'h11: alt <= make;
+		8'h71: del <= make;
+		8'h14: ctrl <= make;
+		8'h66: bspc <= make;
 		8'h05: if(!make) F1 <= ~F1;
 		8'h06: if(!make) F2 <= ~F2;
 		8'h0C: if(!make) F4 <= ~F4;
@@ -98,9 +101,9 @@ assign model = F1;
 assign mapper = F4;
 assign sdcard = F2;
 
-assign reset = power & init && btn[0] & F9 & F1p;
-assign boot = 1'b1;
-assign nmi = F5 && btn[1];
+assign reset = power & init && btn[0] & F9 & (ctrl | alt | del) & F1p;
+assign boot = F11 & (ctrl | alt | bspc);
+assign nmi = F5 & btn[1];
 
 //-------------------------------------------------------------------------------------------------
 
