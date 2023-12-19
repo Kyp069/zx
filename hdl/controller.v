@@ -9,13 +9,18 @@ module controller
 	input  wire       clock,
 	input  wire       power,
 
-	output wire       model,
-	output wire       mapper,
-	output wire       sdcard,
+	output reg        early = 1'b0,
+	output reg        mouse = 1'b0,
+	output reg        model = 1'b0,
+	output reg        mapper = 1'b1,
+	output reg        sdcard = 1'b1,
 
 	output wire       reset,
 	output wire       boot,
 	output wire       nmi,
+
+	input  wire       vgaE,
+	input  wire       vgaD,
 
 	input  wire[     1:0] cepix,
 
@@ -58,7 +63,7 @@ module controller
 
 reg vga = 1'b0;
 
-scandoubler #(.RGBW(RGBW)) Scandoubler
+scandoubler #(.RGBW(RGBW)) scandoubler
 (
 	.clock  (clock   ),
 	.enable (vga     ),
@@ -74,44 +79,44 @@ scandoubler #(.RGBW(RGBW)) Scandoubler
 
 //-------------------------------------------------------------------------------------------------
 
+initial begin model = 1'b0; early = 1'b0; mouse = 1'b0; mapper = 1'b1; sdcard = 1'b1; end
+
 ps2k keyboard(clock, ps2k, strb, make, code);
 
-reg F1 = 1'b1, F2 = 1'b1, F4 = 1'b1, F5 = 1'b1, F9 = 1'b1, F11 = 1'b1;
+reg F5 = 1'b1, F9 = 1'b1, F11 = 1'b1;
 reg alt = 1'b1, del = 1'b1, ctrl = 1'b1, bspc = 1'b1;
 
-always @(posedge clock) if(strb)
-	case(code)
-		8'h03: F5 <= make;
-		8'h01: F9 <= make;
-		8'h78: F11 <= make;
-		8'h11: alt <= make;
-		8'h71: del <= make;
-		8'h14: ctrl <= make;
-		8'h66: bspc <= make;
-		8'h05: if(!make) F1 <= ~F1;
-		8'h06: if(!make) F2 <= ~F2;
-		8'h0C: if(!make) F4 <= ~F4;
-		8'h7E: if(!make) vga <= ~vga;
-	endcase
+always @(posedge clock) begin
+	if(!vgaE) vga <= vgaD;
+	if(strb)
+		case(code)
+			8'h7E: if(!make) vga <= ~vga;       // scroll lock
+			8'h05: if(!make) model <= 1'b0;     // F1
+			8'h06: if(!make) model <= 1'b1;     // F2
+			8'h0C: if(!make) early <= ~early;   // F4
+			8'h0B: if(!make) mapper <= ~mapper; // F6
+			8'h83: if(!make) sdcard <= ~sdcard; // F7
+			8'h0A: if(!make) mouse <= ~mouse;   // F8
+			8'h03: F5 <= make;
+			8'h01: F9 <= make;
+			8'h78: F11 <= make;
+			8'h11: alt <= make;
+			8'h71: del <= make;
+			8'h14: ctrl <= make;
+			8'h66: bspc <= make;
+		endcase
+end
 
-reg F1d = 1'b1, F1p = 1'b1;
-always @(posedge clock) if(strb) begin F1d <= F1; F1p <= F1 == F1d; end
+reg modeld = 1'b1, modelp = 1'b1;
+always @(posedge clock) if(strb) begin modeld <= model; modelp <= modeld == model; end
 
-assign model = F1;
-assign mapper = F4;
-assign sdcard = F2;
-
-assign reset = power & init && btn[0] & F9 & (ctrl | alt | del) & F1p;
+assign reset = power & init && btn[0] & F9 & (ctrl | alt | del) & modelp;
 assign boot = F11 & (ctrl | alt | bspc);
 assign nmi = F5 & btn[1];
 
 //-------------------------------------------------------------------------------------------------
 
-//ps2m mouse(clock, reset, ps2m, xaxis, yaxis, mbtns);
-
-assign xaxis = 1'd0;
-assign yaxis = 1'd0;
-assign mbtns = 1'd0;
+ps2m mouse(clock, reset, ps2m, xaxis, yaxis, mbtns);
 
 //-------------------------------------------------------------------------------------------------
 
@@ -123,7 +128,7 @@ assign sdvMiso = sdcMiso;
 //-------------------------------------------------------------------------------------------------
 
 reg[20:0] cc = 0;
-always @(posedge clock) if(power) if(!init) cc <= cc+1'd1;
+always @(posedge clock) if(power && vgaE) if(!init) cc <= cc+1'd1;
 
 wire[13:0] rom0A = iniA[13:0];
 wire[ 7:0] rom0Q;

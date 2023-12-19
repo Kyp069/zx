@@ -4,7 +4,7 @@ module demistify
 #
 (
 	parameter RGBW          = 18,
-	parameter OSD_PIXEL_MSB = 5
+	parameter OSD_PIXEL_MSB = 7
 )
 (
 	input  wire       clock,
@@ -58,7 +58,11 @@ module demistify
 //-------------------------------------------------------------------------------------------------
 
 wire spiCk = sdcCk;
-wire spiSs2, spiSs3, spiSs4, spiSsIo, spiMosi, spiMiso;
+wire spiSs2, spiSs3, spiSs4, spiSsIo, spiMosi;
+
+wire dioMiso;
+wire uioMiso;
+wire spiMiso = spiSsIo ? dioMiso : uioMiso;
 
 wire kbiCk = ps2k[0]; wire kboCk; assign ps2k[0] = kboCk ? 1'bZ : kboCk;
 wire kbiDQ = ps2k[1]; wire kboDQ; assign ps2k[1] = kboDQ ? 1'bZ : kboDQ;
@@ -156,7 +160,7 @@ user_io #(.STRLEN(99), .SD_IMAGES(1)) user_io
 	.SPI_CLK       (spiCk   ),
 	.SPI_SS_IO     (spiSsIo ),
 	.SPI_MOSI      (spiMosi ),
-	.SPI_MISO      (spiMiso ),
+	.SPI_MISO      (uioMiso ),
 
 	.joystick_0    (),
 	.joystick_1    (),
@@ -266,7 +270,7 @@ wire[RGBW-1:0] sdbirgb = { osdRo, osdGo, osdBo };
 wire[ 1:0] sdbosync;
 wire[RGBW-1:0] sdborgb;
 
-scandoubler #(.RGBW(RGBW)) Scandoubler
+scandoubler #(.RGBW(RGBW)) scandoubler
 (
 	.clock  (clock   ),
 	.enable (!rgb    ),
@@ -347,7 +351,9 @@ data_io data_io
 	.SPI_SS2       (spiSs2  ),
 	.SPI_SS4       (spiSs4  ),
 	.SPI_DI        (spiMosi ),
-	.SPI_DO        (spiMiso ),
+//	.SPI_DO        (spiMiso ),
+	.SPI_DO_I      (spiMiso ),
+	.SPI_DO_O      (dioMiso ),
 	.ioctl_download(ioctlDl ),
 	.ioctl_upload  (        ),
 	.ioctl_index   (        ),

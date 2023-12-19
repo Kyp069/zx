@@ -4,27 +4,27 @@
 module osd (
 	// OSDs pixel clock, should be synchronous to cores pixel clock to
 	// avoid jitter.
-	input        clk_sys,
-	input        ce,
+	input  wire      clk_sys,
+	input  wire      ce,
 
 	// SPI interface
-	input        SPI_SCK,
-	input        SPI_SS3,
-	input        SPI_DI,
+	input  wire      SPI_SCK,
+	input  wire      SPI_SS3,
+	input  wire      SPI_DI,
 
-	input  [1:0] rotate, //[0] - rotate [1] - left or right
+	input  wire[1:0] rotate, //[0] - rotate [1] - left or right
 
 	// VGA signals coming from core
-	input  [7:0] R_in,
-	input  [7:0] G_in,
-	input  [7:0] B_in,
-	input        HSync,
-	input        VSync,
+	input  wire[7:0] R_in,
+	input  wire[7:0] G_in,
+	input  wire[7:0] B_in,
+	input  wire      HSync,
+	input  wire      VSync,
 
 	// VGA signals going to video connector
-	output [7:0] R_out,
-	output [7:0] G_out,
-	output [7:0] B_out
+	output wire[7:0] R_out,
+	output wire[7:0] G_out,
+	output wire[7:0] B_out
 );
 
 parameter OSD_X_OFFSET = 11'd0;
@@ -47,7 +47,7 @@ reg        osd_enable;
 (* ramstyle = "no_rw_check" *) reg  [7:0] osd_buffer[2047:0];  // the OSD buffer itself
 
 // the OSD has its own SPI interface to the io controller
-always@(posedge SPI_SCK, posedge SPI_SS3) begin
+always@(posedge SPI_SCK, posedge SPI_SS3) begin : spi
 	reg  [4:0] cnt;
 	reg [10:0] bcnt;
 	reg  [7:0] sbuf;
@@ -100,7 +100,7 @@ wire [10:0] dsp_height = vs_pol ? vs_low : vs_high;
 wire doublescan = (dsp_height>350);
 
 reg auto_ce_pix;
-always @(posedge clk_sys) begin
+always @(posedge clk_sys) begin : cepix
 	reg [15:0] cnt = 0;
 	reg  [2:0] pixsz;
 	reg  [2:0] pixcnt;
@@ -129,7 +129,7 @@ end
 
 wire ce_pix = OSD_AUTO_CE ? auto_ce_pix : ce;
 
-always @(posedge clk_sys) begin
+always @(posedge clk_sys) begin : sync
 	reg hsD;
 	reg vsD;
 

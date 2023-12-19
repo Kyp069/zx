@@ -23,14 +23,16 @@
 
 module data_io
 (
-	input             clk_sys,
-	input             SPI_SCK,
-	input             SPI_SS2,
-	input             SPI_SS4,
-	input             SPI_DI,
-	inout             SPI_DO,
+	input  wire       clk_sys,
+	input  wire       SPI_SCK,
+	input  wire       SPI_SS2,
+	input  wire       SPI_SS4,
+	input  wire       SPI_DI,
+//	inout  wire       SPI_DO,
+	inout  wire       SPI_DO_I,
+	output wire       SPI_DO_O,
 
-	input             clkref_n, // assert ioctl_wr one cycle after clkref stobe (negative active)
+	input  wire       clkref_n, // assert ioctl_wr one cycle after clkref stobe (negative active)
 
 	// ARM -> FPGA download
 	output reg        ioctl_download = 0, // signal indicating an active download
@@ -41,7 +43,7 @@ module data_io
 	output reg        ioctl_wr,           // strobe indicating ioctl_dout valid
 	output reg [24:0] ioctl_addr,
 	output reg  [7:0] ioctl_dout,
-	input       [7:0] ioctl_din,
+	input  wire [7:0] ioctl_din,
 	output reg [23:0] ioctl_fileext,      // file extension
 	output reg [31:0] ioctl_filesize      // file size
 );
@@ -68,7 +70,8 @@ localparam DIO_FILE_INFO    = 8'h56;
 localparam DIO_FILE_RX      = 8'h57;
 localparam DIO_FILE_RX_DAT  = 8'h58;
 
-assign SPI_DO = reg_do;
+//assign SPI_DO = reg_do;
+assign SPI_DO_O = reg_do;
 
 // data_io has its own SPI interface to the io controller
 always@(negedge SPI_SCK or posedge SPI_SS2) begin : SPI_TRANSMITTER
@@ -171,7 +174,8 @@ always@(posedge SPI_SCK, posedge SPI_SS4) begin : SPI_DIRECT_RECEIVER
 		// don't shift in last bit. It is evaluated directly
 		// when writing to ram
 		if(cnt2 != 7)
-			sbuf2 <= { sbuf2[5:0], SPI_DO };
+		//	sbuf2 <= { sbuf2[5:0], SPI_DO };
+			sbuf2 <= { sbuf2[5:0], SPI_DO_I };
 
 		cnt2 <= cnt2 + 1'd1;
 
@@ -182,7 +186,8 @@ always@(posedge SPI_SCK, posedge SPI_SS4) begin : SPI_DIRECT_RECEIVER
 			if (bytecnt == 513) bytecnt <= 0;
 			// don't send the CRC bytes
 			if (~bytecnt[9]) begin
-				data_w2 <= {sbuf2, SPI_DO};
+			//	data_w2 <= {sbuf2, SPI_DO};
+				data_w2 <= {sbuf2, SPI_DO_I};
 				rclk2 <= ~rclk2;
 			end
 		end

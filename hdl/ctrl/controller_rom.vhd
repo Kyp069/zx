@@ -28,34 +28,6 @@ signal q2 : std_logic_vector(31 downto 0);
 signal we1 : std_logic;
 signal we2 : std_logic;
 
-component controller_rom1
-	generic (ADDR_WIDTH : integer);
-	port
-	(
-		clk     : in  std_logic;
-		reset_n : in  std_logic;
-		we      : in  std_logic;
-		bytesel : in  std_logic_vector(3 downto 0);
-		addr    : in  std_logic_vector(demistify_romsize1-3 downto 0);
-		d       : in  std_logic_vector(31 downto 0);
-		q       : out std_logic_vector(31 downto 0)
-	);
-end component;
-
-component controller_rom2
-	generic (ADDR_WIDTH : integer);
-	port
-	(
-		clk     : in  std_logic;
-		reset_n : in  std_logic;
-		we      : in  std_logic;
-		bytesel : in  std_logic_vector(3 downto 0);
-		addr    : in  std_logic_vector(demistify_romsize2-3 downto 0);
-		d       : in  std_logic_vector(31 downto 0);
-		q       : out std_logic_vector(31 downto 0)
-	);
-end component;
-
 begin
 
 	-- use high bit of incoming address to switch between two ROMS
@@ -66,7 +38,7 @@ begin
 	q <= q1 when romsel_a='0' else q2;
 
 
-	rom1 : controller_rom1
+	rom1 : entity work.controller_rom1
 	generic map
 	(
 		ADDR_WIDTH => demistify_romsize1-2
@@ -81,7 +53,7 @@ begin
 		bytesel => bytesel
 	);
 
-	rom2 : controller_rom2
+	rom2 : entity work.controller_rom2
 	generic map
 	(
 		ADDR_WIDTH => demistify_romsize2-2

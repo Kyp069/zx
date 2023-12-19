@@ -50,6 +50,7 @@ BUFGMUX_1 BufgMux(.I0(clock0), .I1(clock1), .O(clock), .S(model));
 
 //-------------------------------------------------------------------------------------------------
 
+wire mouse;
 wire mapper;
 wire sdcard;
 
@@ -81,17 +82,20 @@ wire iniW;
 wire[18:0] iniA;
 wire[ 7:0] iniD;
 
-//controller #(.RGBW(9)) controller
-demistify #(.RGBW(9), .OSD_PIXEL_MSB(2)) controller
+controller #(.RGBW(9)) controller
+//demistify #(.RGBW(9), .OSD_PIXEL_MSB(2)) controller
 (
 	.clock  (clock  ),
 	.power  (power  ),
 	.boot   (boot   ),
+	.mouse  (mouse  ),
 	.model  (model  ),
 	.mapper (mapper ),
 	.sdcard (sdcard ),
 	.reset  (reset  ),
 	.nmi    (nmi    ),
+	.vgaE   (vgaE   ),
+	.vgaD   (vgaD   ),
 	.cepix  (cepix  ),
 	.iblank (iblank ),
 	.isync  (isync  ),
@@ -139,7 +143,7 @@ wire ear = ~tape;
 wire[14:0] left;
 wire[14:0] right;
 
-wire[7:0] joy = { 2'b00, joy1 };
+wire[7:0] joy = ~{ 2'b11, joy1 };
 
 wire cep1x;
 wire cep2x;
@@ -155,6 +159,7 @@ wire[ 7:0] memQ2;
 
 zx Zx
 (
+	.mouse  (mouse  ),
 	.model  (model  ),
 	.mapper (mapper ),
 	.sdcard (sdcard ),
@@ -225,14 +230,18 @@ dprs #(16) Dpr
 
 assign memQ1 = sramDQ;
 
-assign sramWe = init ? !memWr : !iniW;
-assign sramDQ = sramWe ? 8'bZ : init ? memD1 : iniD;
-assign sramA  = { 2'b00, init ? memA1 : iniA };
+assign sramWe = !vgaE ? 1'b1 : init ? !memWr : !iniW;
+assign sramDQ = !vgaE ? 8'bZ : sramWe ? 8'bZ : init ? memD1 : iniD;
+assign sramA  = !vgaE ? 20'h8FD5 : { 2'b00, init ? memA1 : iniA };
 
 //-------------------------------------------------------------------------------------------------
 
-assign stnd = 2'b01;
-assign led = ~sdvCs;
+reg[2:0] vc = 0;
+wire vgaE = vc[2];
+always @(posedge clock) if(power) if(!vgaE) vc <= vc+1'd1;
+
+reg vgaD = 0;
+always @(posedge clock) if(vc == 3'b001) vgaD <= sramDQ[0];
 
 //-------------------------------------------------------------------------------------------------
 
@@ -242,6 +251,11 @@ always @(posedge clock) mb <= mb+1'd1;
 wire clockmb;
 BUFG BufgMB(.I(mb[1]), .O(clockmb));
 multiboot multiboot(clockmb, boot);
+
+//-------------------------------------------------------------------------------------------------
+
+assign stnd = 2'b01;
+assign led = ~sdvCs;
 
 //-------------------------------------------------------------------------------------------------
 endmodule

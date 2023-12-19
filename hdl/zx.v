@@ -2,6 +2,8 @@
 module zx
 //-------------------------------------------------------------------------------------------------
 (
+	input  wire       early,  // 0 = off, 1 = on
+	input  wire       mouse,  // 0 = off, 1 = on
 	input  wire       model,  // 0 = 48K, 1 = 128K
 	input  wire       mapper, // 0 = off, 1 = on
 	input  wire       sdcard, // 0 = off, 1 = on
@@ -46,10 +48,10 @@ module zx
 	output wire       cecpu,  // clock enables
 	output wire       cep1x,
 	output wire       cep2x,
+	output wire       rfsh,
 
-	output wire       memRf,  // memory
-	output wire       memRd,
-	output wire       memWr,
+	output wire       memR1, // memory
+	output wire       memW1,
 	output wire[18:0] memA1,
 	output wire[ 7:0] memD1,
 	input  wire[ 7:0] memQ1,
@@ -108,13 +110,13 @@ wire nc3M5 = ne3M5 & contend;
 reg irq = 1'b1;
 always @(posedge clock) if(pc3M5) irq <= vduI;
 
-wire iorq, mreq, rfsh, m1, rd, wr;
+wire iorq, mreq, m1, rd, wr;
 
 wire[15:0] a;
 wire[ 7:0] d;
 wire[ 7:0] q;
 
-cpu Cpu
+cpu cpu
 (
 	.clock  (clock  ),
 	.ne     (nc3M5  ),
@@ -144,7 +146,7 @@ wire[2:0] border = portFE[2:0];
 
 //-------------------------------------------------------------------------------------------------
 
-wire io7FFDwr = !(!io7FFD && !wr);
+wire io7FFDwr = !io7FFD && !wr;
 
 reg io7FFDwrd;
 reg[5:0] port7FFD, port7FFDd;
@@ -152,12 +154,12 @@ always @(posedge clock, negedge reset)
 	if(!reset) begin
 		port7FFD <= 1'd0;
 		port7FFDd <= 1'd0;
-		io7FFDwrd <= 1'b1;
+		io7FFDwrd <= 1'b0;
 	end
 	else if(nc3M5) begin
 		io7FFDwrd <= io7FFDwr;
 		port7FFDd <= q[5:0];
-		if(model && io7FFDwr && !io7FFDwrd && !port7FFD[5]) port7FFD <= port7FFDd;
+		if(model && !io7FFDwr && io7FFDwrd && !port7FFD[5]) port7FFD <= port7FFDd;
 	end
 
 wire      vmmPage = port7FFD[3];
@@ -169,7 +171,7 @@ wire[2:0] ramPage = addr01 ? 3'd5 : addr10 ? 3'd2 : model ? port7FFD[2:0] : { a[
 wire map, mapRam;
 wire[3:0] mapPage;
 
-mapper Mapper
+mapper div
 (
 	.mapper (mapper ),
 	.clock  (clock  ),
@@ -191,9 +193,8 @@ wire sysram = a[15] || a[14];
 wire esxrom = addr00 && map && !a[13] && !mapRam;
 wire esxram = addr00 && map && (a[13] || mapRam);
 
-assign memRf = !rfsh;
-assign memRd = !mreq && !rd;
-assign memWr = !mreq && !wr && (a[15] || a[14] || (map && a[13]));
+assign memR1 = !mreq && !rd;
+assign memW1 = !mreq && !wr && (a[15] || a[14] || (map && a[13]));
 assign memD1 = q;
 
 assign memA1
@@ -212,8 +213,9 @@ wire[12:0] vduA;
 wire[ 7:0] vduD = memQ2;
 wire[ 7:0] vduQ;
 
-video Video
+video video
 (
+	.early  (early  ),
 	.model  (model  ),
 	.clock  (clock  ),
 	.ce     (ne7M0  ),
@@ -242,7 +244,7 @@ wire[ 7:0] psgQ;
 wire[11:0] a1, b1, c1;
 wire[11:0] a2, b2, c2;
 
-turbosound Turbosound
+turbosound turbosound
 (
 	.clock  (clock  ),
 	.ce     (pe3M5  ),
@@ -267,7 +269,7 @@ turbosound Turbosound
 wire[7:0] spdA = a[7:0];
 wire[7:0] spdQ;
 
-specdrum Specdrum
+specdrum specdrum
 (
 	.clock  (clock  ),
 	.ce     (pc3M5  ),
@@ -284,7 +286,7 @@ specdrum Specdrum
 wire[7:0] sbxA = a[7:0];
 wire[7:0] sbxQ;
 
-soundbox SoundBox
+soundbox soundBox
 (
 	.clock  (clock  ),
 	.ce     (pc3M5  ),
@@ -301,7 +303,7 @@ soundbox SoundBox
 wire[7:0] sdvA = a[7:0];
 wire[7:0] sdvL1, sdvL2, sdvR1, sdvR2;
 
-soundrive SounDrive
+soundrive soundrive
 (
 	.clock  (clock  ),
 	.ce     (pc3M5  ),
@@ -317,20 +319,20 @@ soundrive SounDrive
 );
 
 //-------------------------------------------------------------------------------------------------
-
+/*
 wire saaCs = !(!iorq && !wr && a[7:0] == 8'hFF);
 wire saaA0 = a[8];
 
 wire[7:0] saaD = q;
-
+*/
 wire[7:0] saaL;
 wire[7:0] saaR;
-
+/*
 reg[3:0] ce8;
 wire ce8M0 = !ce8;
 always @(negedge clock) if(ce8 == 6) ce8 <= 1'd0; else ce8 <= ce8+1'd1;
 
-saa1099 SAA
+saa1099 saa
 (
 	.clk_sys(clock  ),
 	.ce     (ce8M0  ),
@@ -342,10 +344,10 @@ saa1099 SAA
 	.out_l  (saaL   ),
 	.out_r  (saaR   )
 );
-
+*/
 //-------------------------------------------------------------------------------------------------
 
-audio Audio
+audio audio
 (
 	.ear    (ear    ),
 	.mic    (mic    ),
@@ -373,7 +375,7 @@ audio Audio
 wire[7:0] keyA = a[15:8];
 wire[4:0] keyQ;
 
-keyboard Keyboard
+keyboard keyboard
 (
 	.clock  (clock  ),
 	.strb   (strb   ),
@@ -391,7 +393,7 @@ wire[4:0] mbrQ = { &(row|{8{col[4]}}), &(row|{8{col[3]}}), &(row|{8{col[2]}}), &
 wire[7:0] usdQ;
 wire[7:0] usdA = a[7:0];
 
-usd uSD
+usd usd
 (
 	.sdcard (sdcard ),
 	.clock  (clock  ),
@@ -413,15 +415,15 @@ usd uSD
 
 //-------------------------------------------------------------------------------------------------
 
-wire[7:0] qDF
-	= a[ 9:8] ==  2'b10 ? { vduQ[7:3], mbtns }
-	: a[10:8] == 3'b011 ? xaxis
-	: a[10:8] == 3'b111 ? yaxis
+wire[7:0] ioDFQ
+	= mouse && a[ 9:8] ==  2'b10 ? { vduQ[7:3], mbtns }
+	: mouse && a[10:8] == 3'b011 ? xaxis
+	: mouse && a[10:8] == 3'b111 ? yaxis
 	: joy;
 
 assign d
 	= !mreq   ? memQ1
-	: !ioDF   ? qDF
+	: !ioDF   ? ioDFQ
 	: !ioEB   ? usdQ
 	: !ioFE   ? { 1'b1, ear|speaker, 1'b1, keyQ & mbrQ }
 	: !ioFFFD ? psgQ

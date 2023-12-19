@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------- #
 #
-# Copyright (C) 2021  Intel Corporation. All rights reserved.
+# Copyright (C) 2022  Intel Corporation. All rights reserved.
 # Your use of Intel Corporation's design tools, logic functions 
 # and other software and tools, and any partner logic 
 # functions, and any output files from any of the foregoing 
@@ -18,8 +18,8 @@
 # -------------------------------------------------------------------------- #
 #
 # Quartus Prime
-# Version 21.1.0 Build 842 10/21/2021 SJ Lite Edition
-# Date created = 16:11:14  July 08, 2022
+# Version 22.1std.0 Build 915 10/25/2022 SC Lite Edition
+# Date created = 16:21:59  February 25, 2023
 #
 # -------------------------------------------------------------------------- #
 #
@@ -40,14 +40,30 @@
 set_global_assignment -name FAMILY "Cyclone IV E"
 set_global_assignment -name DEVICE EP4CE55F23C8
 set_global_assignment -name TOP_LEVEL_ENTITY np1
-set_global_assignment -name ORIGINAL_QUARTUS_VERSION 21.1.0
-set_global_assignment -name PROJECT_CREATION_TIME_DATE "16:11:14  JULY 08, 2022"
-set_global_assignment -name LAST_QUARTUS_VERSION "21.1.0 Lite Edition"
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 22.1STD.0
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "16:21:59  FEBRUARY 25, 2023"
+set_global_assignment -name LAST_QUARTUS_VERSION "22.1std.0 Lite Edition"
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
 set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR 1
 set_global_assignment -name NOMINAL_CORE_SUPPLY_VOLTAGE 1.2V
+set_global_assignment -name ENABLE_OCT_DONE OFF
+set_global_assignment -name ENABLE_CONFIGURATION_PINS OFF
+set_global_assignment -name ENABLE_BOOT_SEL_PIN OFF
+set_global_assignment -name USE_CONFIGURATION_DEVICE OFF
+set_global_assignment -name GENERATE_RBF_FILE ON
+set_global_assignment -name CRC_ERROR_OPEN_DRAIN OFF
+set_global_assignment -name ON_CHIP_BITSTREAM_DECOMPRESSION OFF
+set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -rise
+set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -fall
+set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -rise
+set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -fall
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_global_assignment -name TIMING_ANALYZER_MULTICORNER_ANALYSIS ON
+set_global_assignment -name SMART_RECOMPILE ON
+set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL
 
 set_location_assignment PIN_T2 -to clock50
 
@@ -73,35 +89,10 @@ set_location_assignment PIN_M1 -to rgb[2]
 set_location_assignment PIN_J1 -to rgb[1]
 set_location_assignment PIN_H1 -to rgb[0]
 
-set_location_assignment PIN_AA13 -to tape
-
-set_location_assignment PIN_N22 -to i2sIn[2]
-set_location_assignment PIN_AA14 -to i2sIn[1]
-set_location_assignment PIN_P22 -to i2sIn[0]
-
-set_location_assignment PIN_A3 -to dsg[1]
-set_location_assignment PIN_B4 -to dsg[0]
-
-set_location_assignment PIN_AA15 -to i2sOut[2]
-set_location_assignment PIN_AB14 -to i2sOut[1]
-set_location_assignment PIN_M20 -to i2sOut[0]
-
-set_location_assignment PIN_U22 -to midi
-
 set_location_assignment PIN_N20 -to ps2k[1]
 set_location_assignment PIN_N19 -to ps2k[0]
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to ps2k[1]
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to ps2k[0]
-
-set_location_assignment PIN_B21 -to ps2m[1]
-set_location_assignment PIN_C21 -to ps2m[0]
-set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to ps2m[1]
-set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to ps2m[0]
-
-set_location_assignment PIN_A20 -to joyCk
-set_location_assignment PIN_B20 -to joyLd
-set_location_assignment PIN_AA18 -to joyS
-set_location_assignment PIN_B19 -to joyD
 
 set_location_assignment PIN_D22 -to sdcCs
 set_location_assignment PIN_E22 -to sdcCk
@@ -153,93 +144,83 @@ set_location_assignment PIN_B5 -to sramA[2]
 set_location_assignment PIN_C3 -to sramA[1]
 set_location_assignment PIN_A4 -to sramA[0]
 
+set_location_assignment PIN_Y6 -to dramCk
+set_location_assignment PIN_W6 -to dramCe
+set_location_assignment PIN_AA3 -to dramCs
+set_location_assignment PIN_AB4 -to dramWe
+set_location_assignment PIN_AA4 -to dramCas
+set_location_assignment PIN_AB3 -to dramRas
+
+set_location_assignment PIN_W7 -to dramDQM[1]
+set_location_assignment PIN_AA5 -to dramDQM[0]
+
+set_location_assignment PIN_V11 -to dramDQ[15]
+set_location_assignment PIN_W10 -to dramDQ[14]
+set_location_assignment PIN_Y10 -to dramDQ[13]
+set_location_assignment PIN_V10 -to dramDQ[12]
+set_location_assignment PIN_V9 -to dramDQ[11]
+set_location_assignment PIN_Y8 -to dramDQ[10]
+set_location_assignment PIN_AB5 -to dramDQ[7]
+set_location_assignment PIN_AA7 -to dramDQ[6]
+set_location_assignment PIN_Y7 -to dramDQ[8]
+set_location_assignment PIN_W8 -to dramDQ[9]
+set_location_assignment PIN_AB7 -to dramDQ[5]
+set_location_assignment PIN_AA8 -to dramDQ[4]
+set_location_assignment PIN_AB8 -to dramDQ[3]
+set_location_assignment PIN_AA9 -to dramDQ[2]
+set_location_assignment PIN_AB9 -to dramDQ[1]
+set_location_assignment PIN_AA10 -to dramDQ[0]
+
+set_location_assignment PIN_W2 -to dramBA[1]
+set_location_assignment PIN_Y1 -to dramBA[0]
+
+set_location_assignment PIN_V6 -to dramA[12]
+set_location_assignment PIN_Y4 -to dramA[11]
+set_location_assignment PIN_W1 -to dramA[10]
+set_location_assignment PIN_V5 -to dramA[9]
+set_location_assignment PIN_Y3 -to dramA[8]
+set_location_assignment PIN_AA1 -to dramA[7]
+set_location_assignment PIN_Y2 -to dramA[6]
+set_location_assignment PIN_V4 -to dramA[5]
+set_location_assignment PIN_V3 -to dramA[4]
+set_location_assignment PIN_U1 -to dramA[3]
+set_location_assignment PIN_U2 -to dramA[2]
+set_location_assignment PIN_V1 -to dramA[1]
+set_location_assignment PIN_V2 -to dramA[0]
+
 set_location_assignment PIN_Y21 -to stm
 set_location_assignment PIN_E4 -to led
 
 set_global_assignment -name SDC_FILE np1.sdc
+
 set_global_assignment -name VERILOG_FILE np1.v
-set_global_assignment -name VERILOG_FILE ../hdl/controller.v
-set_global_assignment -name VERILOG_FILE ../hdl/demistify.v
 set_global_assignment -name VERILOG_FILE ../hdl/zx.v
 set_global_assignment -name VERILOG_FILE ../hdl/cpu.v
-set_global_assignment -name VERILOG_FILE ../hdl/dsg.v
 set_global_assignment -name VERILOG_FILE ../hdl/psg.v
-set_global_assignment -name VERILOG_FILE ../hdl/ram.v
-set_global_assignment -name VERILOG_FILE ../hdl/rom.v
 set_global_assignment -name VERILOG_FILE ../hdl/spi.v
 set_global_assignment -name VERILOG_FILE ../hdl/usd.v
 set_global_assignment -name VERILOG_FILE ../hdl/dprs.v
 set_global_assignment -name VERILOG_FILE ../hdl/ps2k.v
-set_global_assignment -name VERILOG_FILE ../hdl/ps2m.v
-set_global_assignment -name VHDL_FILE ../hdl/ps2/debounce.vhd
-set_global_assignment -name VHDL_FILE ../hdl/ps2/ps2_transceiver.vhd
-set_global_assignment -name VERILOG_FILE ../hdl/dprfaw.v
 set_global_assignment -name VERILOG_FILE ../hdl/audio.v
+set_global_assignment -name VERILOG_FILE ../hdl/romzx.v
+set_global_assignment -name VERILOG_FILE ../hdl/sdram.v
 set_global_assignment -name VERILOG_FILE ../hdl/video.v
 set_global_assignment -name VERILOG_FILE ../hdl/mapper.v
 set_global_assignment -name VERILOG_FILE ../hdl/keyboard.v
-set_global_assignment -name VERILOG_FILE ../hdl/joystick.v
-set_global_assignment -name VERILOG_FILE ../hdl/i2s_encoder.v
-set_global_assignment -name VERILOG_FILE ../hdl/i2s_decoder.v
-set_global_assignment -name SYSTEMVERILOG_FILE ../hdl/saa1099.sv
-set_global_assignment -name VERILOG_FILE ../hdl/specdrum.v
 set_global_assignment -name VERILOG_FILE ../hdl/soundbox.v
+set_global_assignment -name VERILOG_FILE ../hdl/specdrum.v
 set_global_assignment -name VERILOG_FILE ../hdl/soundrive.v
 set_global_assignment -name VERILOG_FILE ../hdl/turbosound.v
-set_global_assignment -name VERILOG_FILE ../hdl/scandoubler.v
-set_global_assignment -name VHDL_FILE ../hdl/832/debug_bridge_jtag.vhd
-set_global_assignment -name VHDL_FILE ../hdl/832/debug_fifo.vhd
-set_global_assignment -name VHDL_FILE ../hdl/832/debug_fifo_altera.vhd
-set_global_assignment -name VHDL_FILE ../hdl/832/debug_virtualjtag.vhd
-set_global_assignment -name VHDL_FILE ../hdl/832/eightthirtytwo_shifter.vhd
-set_global_assignment -name VHDL_FILE ../hdl/832/eightthirtytwo_pkg.vhd
-set_global_assignment -name VHDL_FILE ../hdl/832/eightthirtytwo_hazard.vhd
-set_global_assignment -name VHDL_FILE ../hdl/832/eightthirtytwo_fetchloadstore.vhd
-set_global_assignment -name VHDL_FILE ../hdl/832/eightthirtytwo_decode.vhd
-set_global_assignment -name VHDL_FILE ../hdl/832/eightthirtytwo_debug.vhd
-set_global_assignment -name VHDL_FILE ../hdl/832/eightthirtytwo_cpu.vhd
-set_global_assignment -name VHDL_FILE ../hdl/832/eightthirtytwo_alu.vhd
-set_global_assignment -name VHDL_FILE ../hdl/832/eightthirtytwo_aligner_le.vhd
-set_global_assignment -name VHDL_FILE ../hdl/832/eightthirtytwo_aligner.vhd
-set_global_assignment -name VHDL_FILE ../hdl/ctrl/controller_rom.vhd
-set_global_assignment -name VERILOG_FILE ../hdl/ctrl/controller_rom1_byte.v
-set_global_assignment -name VERILOG_FILE ../hdl/ctrl/controller_rom2_byte.v
-set_global_assignment -name VHDL_FILE ../hdl/ctrl/demistify_config_pkg.vhd
-set_global_assignment -name VHDL_FILE ../hdl/ctrl/interrupt_controller.vhd
-set_global_assignment -name VHDL_FILE ../hdl/ctrl/io_ps2_com.vhd
-set_global_assignment -name VHDL_FILE ../hdl/ctrl/jtag_uart.vhd
-set_global_assignment -name VHDL_FILE ../hdl/ctrl/simple_uart.vhd
-set_global_assignment -name VHDL_FILE ../hdl/ctrl/spi_controller.vhd
-set_global_assignment -name VHDL_FILE ../hdl/ctrl/substitute_mcu.vhd
-set_global_assignment -name VHDL_FILE ../hdl/ctrl/timer_controller.vhd
-set_global_assignment -name VERILOG_FILE ../hdl/mist/user_io.v
-set_global_assignment -name VERILOG_FILE ../hdl/mist/sd_card.v
-set_global_assignment -name VERILOG_FILE ../hdl/mist/data_io.v
-set_global_assignment -name VERILOG_FILE ../hdl/mist/osd18.v
-set_global_assignment -name VHDL_FILE ../hdl/T80/T80.vhd
-set_global_assignment -name VHDL_FILE ../hdl/T80/T80pa.vhd
-set_global_assignment -name VHDL_FILE ../hdl/T80/T80_ALU.vhd
-set_global_assignment -name VHDL_FILE ../hdl/T80/T80_Reg.vhd
-set_global_assignment -name VHDL_FILE ../hdl/T80/T80_Pack.vhd
-set_global_assignment -name VHDL_FILE ../hdl/T80/T80_MCode.vhd
+
 set_global_assignment -name QIP_FILE ips/pll0.qip
 set_global_assignment -name QIP_FILE ips/pll1.qip
+set_global_assignment -name QIP_FILE ../hdl/832/files.qip
+set_global_assignment -name QIP_FILE ../hdl/T80/files.qip
+set_global_assignment -name QIP_FILE ../hdl/ctrl/files.qip
+set_global_assignment -name VERILOG_FILE ../hdl/mist/osd18.v
+set_global_assignment -name VERILOG_FILE ../hdl/mist/user_io.v
 
-set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
-set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
-set_global_assignment -name TIMING_ANALYZER_MULTICORNER_ANALYSIS ON
-set_global_assignment -name SMART_RECOMPILE ON
-set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
-set_global_assignment -name ENABLE_OCT_DONE OFF
-set_global_assignment -name USE_CONFIGURATION_DEVICE OFF
-set_global_assignment -name GENERATE_RBF_FILE ON
-set_global_assignment -name CRC_ERROR_OPEN_DRAIN OFF
-set_global_assignment -name ON_CHIP_BITSTREAM_DECOMPRESSION OFF
-set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -rise
-set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -fall
-set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -rise
-set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -fall
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

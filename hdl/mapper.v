@@ -45,18 +45,18 @@ wire addr =
 reg automap, m1on;
 always @(posedge clock, negedge reset)
 	if(!reset) { automap, m1on } <= 1'd0;
-	else if(ce) begin
-		if(!mreq && !m1 && mapper) begin
-			if(addr) m1on <= 1'b1; // activate automapper after this cycle
-			else if(a[15:3] == 13'h3FF) m1on <= 1'b0; // deactivate automapper after this cycle
-			else if(a[15:8] == 8'h3D) { automap, m1on } <= 2'b11; // activate automapper immediately
-		end
-		if(m1) automap <= m1on;
-	end
+	else if(ce)
+		if(!mreq)
+			if(!m1) begin
+				if(addr) m1on <= 1'b1; // activate automapper after this cycle
+				else if(a[15:3] == 13'h3FF) m1on <= 1'b0; // deactivate automapper after this cycle
+				else if(a[15:8] == 8'h3D) { automap, m1on } <= 2'b11; // activate automapper immediately
+			end
+			else automap <= m1on;
 
 //-------------------------------------------------------------------------------------------------
 
-assign map = forcemap || automap;
+assign map = forcemap || (automap && mapper);
 assign ram = mapram;
 assign page = !a[13] && mapram ? 4'd3 : mappage;
 

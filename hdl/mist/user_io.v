@@ -23,17 +23,17 @@
 // parameter STRLEN and the actual length of conf_str have to match
  
 module user_io (
-	input [(8*STRLEN)-1:0] conf_str,
-	output       [9:0]  conf_addr, // RAM address for config string, if STRLEN=0
-	input        [7:0]  conf_chr,
+	input  wire[(8*STRLEN)-1:0] conf_str,
+	output wire  [9:0]  conf_addr, // RAM address for config string, if STRLEN=0
+	input  wire  [7:0]  conf_chr,
 
-	input               clk_sys, // clock for system-related messages (kbd, joy, etc...)
-	input               clk_sd,  // clock for SD-card related messages
+	input  wire         clk_sys, // clock for system-related messages (kbd, joy, etc...)
+	input  wire         clk_sd,  // clock for SD-card related messages
 
-	input               SPI_CLK,
-	input               SPI_SS_IO,
+	input  wire         SPI_CLK,
+	input  wire         SPI_SS_IO,
 	output reg          SPI_MISO,
-	input               SPI_MOSI,
+	input  wire         SPI_MOSI,
 
 	output reg   [31:0] joystick_0,
 	output reg   [31:0] joystick_1,
@@ -42,11 +42,11 @@ module user_io (
 	output reg   [31:0] joystick_4,
 	output reg   [15:0] joystick_analog_0,
 	output reg   [15:0] joystick_analog_1,
-	output        [1:0] buttons,
-	output        [1:0] switches,
-	output              scandoubler_disable,
-	output              ypbpr,
-	output              no_csync,
+	output wire   [1:0] buttons,
+	output wire   [1:0] switches,
+	output wire         scandoubler_disable,
+	output wire         ypbpr,
+	output wire         no_csync,
 	output reg   [63:0] status,
 	output reg    [6:0] core_mod, // core variant, sent before the config string is requested
 	// RTC data from IO controller
@@ -54,16 +54,16 @@ module user_io (
 	output reg   [63:0] rtc,
 
 	// connection to sd card emulation
-	input        [31:0] sd_lba,
-	input [SD_IMAGES-1:0] sd_rd,
-	input [SD_IMAGES-1:0] sd_wr,
+	input  wire  [31:0] sd_lba,
+	input  wire[SD_IMAGES-1:0] sd_rd,
+	input  wire[SD_IMAGES-1:0] sd_wr,
 	output reg          sd_ack,
 	output reg          sd_ack_conf,
-	input               sd_conf,
-	input               sd_sdhc,
+	input  wire         sd_conf,
+	input  wire         sd_sdhc,
 	output reg    [7:0] sd_dout, // valid on rising edge of sd_dout_strobe
 	output reg          sd_dout_strobe,
-	input         [7:0] sd_din,
+	input  wire   [7:0] sd_din,
 	output reg          sd_din_strobe,
 	output reg    [8:0] sd_buff_addr,
 
@@ -71,14 +71,14 @@ module user_io (
 	output reg   [63:0] img_size,    // size of image in bytes
 
 	// ps2 keyboard/mouse emulation
-	output              ps2_kbd_clk,
+	output wire         ps2_kbd_clk,
 	output reg          ps2_kbd_data,
-	input               ps2_kbd_clk_i,
-	input               ps2_kbd_data_i,
-	output              ps2_mouse_clk,
+	input  wire         ps2_kbd_clk_i,
+	input  wire         ps2_kbd_data_i,
+	output wire         ps2_mouse_clk,
 	output reg          ps2_mouse_data,
-	input               ps2_mouse_clk_i,
-	input               ps2_mouse_data_i,
+	input  wire         ps2_mouse_clk_i,
+	input  wire         ps2_mouse_data_i,
 
 	// keyboard data
 	output reg          key_pressed,  // 1-make (pressed), 0-break (released)
@@ -95,8 +95,8 @@ module user_io (
 	output reg          mouse_idx,    // which mouse?
 
 	// serial com port
-	input [7:0]         serial_data,
-	input               serial_strobe
+	input  wire   [7:0] serial_data,
+	input  wire         serial_strobe
 );
 
 parameter STRLEN=0; // config string length

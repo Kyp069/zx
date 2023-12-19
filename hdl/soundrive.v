@@ -20,19 +20,19 @@ module soundrive
 
 always @(posedge clock, negedge reset)
 	if(!reset) l1 <= 1'd0;
-	else if(!iorq && !wr && a == 8'h0F) l1 <= d;
+	else if(ce) if(!iorq && !wr && a == 8'h0F) l1 <= d;
 
 always @(posedge clock, negedge reset)
 	if(!reset) l2 <= 1'd0;
-	else if(!iorq && !wr && a == 8'h1F) l2 <= d;
+	else if(ce) if(!iorq && !wr && a == 8'h1F) l2 <= d;
 
 always @(posedge clock, negedge reset)
 	if(!reset) r1 <= 1'd0;
-	else if(!iorq && !wr && a == 8'h4F) r1 <= d;
+	else if(ce) if(!iorq && !wr && a == 8'h4F) r1 <= d;
 
 always @(posedge clock, negedge reset)
 	if(!reset) r2 <= 1'd0;
-	else if(!iorq && !wr && a == 8'h5F) r2 <= d;
+	else if(ce) if(!iorq && !wr && a == 8'h5F) r2 <= d;
 
 //-------------------------------------------------------------------------------------------------
 endmodule

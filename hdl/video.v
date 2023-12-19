@@ -2,6 +2,7 @@
 module video
 //-------------------------------------------------------------------------------------------------
 (
+	input  wire       early,
 	input  wire       model,
 
 	input  wire       clock,
@@ -28,8 +29,8 @@ module video
 wire[8:0] hCountEnd = model ? 9'd456 : 9'd448;
 wire[8:0] vCountEnd = model ? 9'd311 : 9'd312;
 
-wire[8:0] irqBeg = model? 9'd6  : 9'd2 ;
-wire[8:0] irqEnd = model? 9'd78 : 9'd66;
+wire[8:0] irqBeg = model ? 9'd6  : early ? 9'd2  : 9'd0;
+wire[8:0] irqEnd = model ? 9'd78 : early ? 9'd66 : 9'd64;
 
 //-------------------------------------------------------------------------------------------------
 

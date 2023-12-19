@@ -69,7 +69,7 @@ entity substitute_mcu is
 		joy3 : in std_logic_vector(7 downto 0) := "11111111";
 		joy4 : in std_logic_vector(7 downto 0) := "11111111";
 		
-		buttons : in std_logic_vector(7 downto 0) :="11111111";
+		buttons : in std_logic_vector(31 downto 0) := (others => '1');
 		
 		c64_keys	: in std_logic_vector(63 downto 0) :=X"FFFFFFFFFFFFFFFF";
 
@@ -117,7 +117,7 @@ signal spi_to_host : std_logic_vector(7 downto 0);
 signal spi_trigger : std_logic;
 signal spi_busy : std_logic;
 signal spi_active : std_logic;
-signal spi_active_d : std_logic_vector(4 downto 0);
+-- signal spi_active_d : std_logic_vector(4 downto 0);
 signal spi_write : std_logic;
 signal spi_setcs : std_logic;
 
@@ -572,7 +572,7 @@ begin
 		conf_data0 <= '1';
 		spi_setcs <= '0';
 		spi_write <= '0';
-		spi_active_d<=(others=>'0');
+--		spi_active_d<=(others=>'0');
 	elsif rising_edge(clk) then
 		mem_busy<='1';
 		ser_txgo<='0';
@@ -715,8 +715,7 @@ begin
 							mem_busy<='0';
 
 						when X"EC" => -- Misc inputs;
-							from_mem<=(others => '0');
-							from_mem(7 downto 0)<=not buttons;
+							from_mem(31 downto 0)<=not buttons;
 							mem_busy<='0';
 
 						when X"FC" => -- Platform capabilities;

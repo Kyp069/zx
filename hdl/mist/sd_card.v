@@ -25,38 +25,38 @@
 // http://elm-chan.org/docs/mmc/mmc_e.html
 
 module sd_card (
-    input         clk_sys,
+    input  wire       clk_sys,
     // link to user_io for io controller
-    output reg[31:0] sd_lba,
-    output reg    sd_rd,
-    output reg    sd_wr,
-    input         sd_ack,
-    input         sd_ack_conf,
-    output        sd_conf,
-    output        sd_sdhc,
+    output reg [31:0] sd_lba,
+    output reg        sd_rd,
+    output reg        sd_wr,
+    input  wire       sd_ack,
+    input  wire       sd_ack_conf,
+    output wire       sd_conf,
+    output wire       sd_sdhc,
 
-    input         img_mounted,
-    input  [63:0] img_size,
+    input  wire       img_mounted,
+    input  wire[63:0] img_size,
 
-    output reg    sd_busy = 0,
+    output reg        sd_busy = 0,
     // data coming in from io controller
-    input   [7:0] sd_buff_dout,
-    input         sd_buff_wr,
+    input  wire [7:0] sd_buff_dout,
+    input  wire       sd_buff_wr,
 
     // data going out to io controller
-    output  [7:0] sd_buff_din,
+    output wire [7:0] sd_buff_din,
 
-    input   [8:0] sd_buff_addr,
+    input  wire [8:0] sd_buff_addr,
 
     // configuration input
     // in case of a VHD file, this will determine the SD Card type returned to the SPI master
     // in case of a pass-through, the firmware will display a warning if SDHC is not allowed,
     // but the card inserted is SDHC
-    input         allow_sdhc,
+    input  wire   allow_sdhc,
 
-    input         sd_cs,
-    input         sd_sck,
-    input         sd_sdi,
+    input  wire   sd_cs,
+    input  wire   sd_sck,
+    input  wire   sd_sdi,
     output reg    sd_sdo
 );
 
@@ -585,17 +585,17 @@ endmodule
 
 module sd_card_dpram #(parameter DATAWIDTH=8, ADDRWIDTH=9)
 (
-    input                   clock_a,
-    input   [ADDRWIDTH-1:0] address_a,
-    input   [DATAWIDTH-1:0] data_a,
-    input                   wren_a,
-    output reg [DATAWIDTH-1:0] q_a,
+    input  wire                 clock_a,
+    input  wire [ADDRWIDTH-1:0] address_a,
+    input  wire [DATAWIDTH-1:0] data_a,
+    input  wire                 wren_a,
+    output reg  [DATAWIDTH-1:0] q_a,
 
-    input                   clock_b,
-    input   [ADDRWIDTH-1:0] address_b,
-    input   [DATAWIDTH-1:0] data_b,
-    input                   wren_b,
-    output reg [DATAWIDTH-1:0] q_b
+    input  wire                 clock_b,
+    input  wire [ADDRWIDTH-1:0] address_b,
+    input  wire [DATAWIDTH-1:0] data_b,
+    input  wire                 wren_b,
+    output reg  [DATAWIDTH-1:0] q_b
 );
 
 reg [DATAWIDTH-1:0] ram[0:(1<<ADDRWIDTH)-1];

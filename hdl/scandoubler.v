@@ -59,8 +59,8 @@ always @(posedge clock) if(ice) if(iHBlankPosedge) iHBlankBeg <= iHCount;
 reg[HCW-1:0] iHBlankEnd;
 always @(posedge clock) if(ice) if(iHBlankNegedge) iHBlankEnd <= iHCount;
 
-reg[HCW-1:0] iHSyncBegin;
-always @(posedge clock) if(ice) if(iHSyncPosedge) iHSyncBegin <= iHCount;
+reg[HCW-1:0] iHSyncBeg;
+always @(posedge clock) if(ice) if(iHSyncPosedge) iHSyncBeg <= iHCount;
 
 reg[HCW-1:0] iHSyncEnd;
 always @(posedge clock) if(ice) if(iHSyncNegedge) iHSyncEnd <= iHCount;
@@ -71,7 +71,8 @@ always @(posedge clock) if(ice) if(iVSyncNegedge) line <= 0; else if(iHSyncNeged
 //-------------------------------------------------------------------------------------------------
 
 reg[HCW-1:0] oHCount;
-always @(posedge clock) if(oce) if(oHSyncPosedge) oHCount <= iHSyncEnd; else if(oHCount == iHSyncEnd) oHCount <= 0; else oHCount <= oHCount+1'd1;
+//always @(posedge clock) if(oce) if(oHCount == iHSyncBeg) oHCount <= 0; else oHCount <= oHCount+1'd1;
+always @(posedge clock) if(oce) if(oHSyncPosedge) oHCount <= iHSyncEnd-(iHSyncEnd-iHSyncBeg); else if(oHCount == iHSyncEnd) oHCount <= 0; else oHCount <= oHCount+1'd1;
 
 //-------------------------------------------------------------------------------------------------
 
@@ -79,7 +80,7 @@ reg ohb;
 always @(posedge clock) if(oce) if(oHCount == iHBlankBeg) ohb <= 1'b1; else if(oHCount == iHBlankEnd) ohb <= 1'b0;
 
 reg ohs;
-always @(posedge clock) if(oce) if(oHCount == iHSyncBegin) ohs <= 1'b1; else if(oHCount == iHSyncEnd) ohs <= 1'b0;
+always @(posedge clock) if(oce) if(oHCount == iHSyncBeg) ohs <= 1'b1; else if(oHCount == iHSyncEnd) ohs <= 1'b0;
 
 //-------------------------------------------------------------------------------------------------
 
