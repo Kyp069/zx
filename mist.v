@@ -1,6 +1,10 @@
 //-------------------------------------------------------------------------------------------------
 module mist
 //-------------------------------------------------------------------------------------------------
+#
+(
+	RGBW = 6
+)
 (
 	input  wire       clock,
 	input  wire       ne14M,
@@ -23,7 +27,7 @@ module mist
 	output wire[63:0] status,
 
 	output wire[ 1:0] sync,
-	output wire[23:0] rgb,
+	output wire[RGBW*3-1:0] rgb,
 
 	output wire       ps2kCk,
 	output wire       ps2kD,
@@ -237,9 +241,9 @@ module mist
 
 //--- osd -----------------------------------------------------------------------------------------
 
-	wire[23:0] rgbosd;
+	wire[RGBW*3-1:0] rgbosd;
 
-	osd #(.OSD_AUTO_CE(0), .BIG_OSD(1'b1), .OUT_COLOR_DEPTH(8)) osd
+	osd #(.OSD_AUTO_CE(0), .BIG_OSD(1'b1), .OUT_COLOR_DEPTH(RGBW)) osd
 	(
 		.clk_sys(clock  ),
 		.ce     (ne7M0  ),
@@ -251,18 +255,18 @@ module mist
 		.VBlank (1'b0   ),
 		.HSync  (hsync  ),
 		.VSync  (vsync  ),
-		.R_in   ({4{r,r&i}}),
-		.G_in   ({4{g,g&i}}),
-		.B_in   ({4{b,b&i}}),
-		.R_out  (rgbosd[23:16]),
-		.G_out  (rgbosd[15: 8]),
-		.B_out  (rgbosd[ 7: 0]),
+		.R_in   ({RGBW/2{r,r&i}}),
+		.G_in   ({RGBW/2{g,g&i}}),
+		.B_in   ({RGBW/2{b,b&i}}),
+		.R_out  (rgbosd[RGBW*3-1:RGBW*2]),
+		.G_out  (rgbosd[RGBW*2-1:RGBW*1]),
+		.B_out  (rgbosd[RGBW*1-1:RGBW*0]),
 		.osd_enable()
 	);
 
 //---scandoubler ----------------------------------------------------------------------------------
 
-	scandoubler #(.RGBW(24)) scandoubler
+	scandoubler #(.RGBW(RGBW*3)) scandoubler
 	(
 		.clock   (clock  ),
 		.novga   (novga  ),
