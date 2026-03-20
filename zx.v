@@ -12,7 +12,6 @@ module zx
 	input  wire       pe3M5,
 
 	input  wire       reset,
-	output wire       mreq,
 	output wire       rfsh,
 	input  wire       nmi,
 
@@ -55,6 +54,7 @@ module zx
 //--- io ------------------------------------------------------------------------------------------
 
 	wire iorq;
+	wire mreq;
 	wire irq;
 	wire m1;
 	wire rd;
@@ -182,8 +182,8 @@ module zx
 
 	assign a2 = a[15:14] ? { 2'd2, ramPage, a[13:0] } : mapped && ramcs ? { 2'd1, page, a[12:0] } : { 2'd0, romPage, a[13:0] };
 	assign d2 = q;
-	assign r2 = rd;
-	assign w2 = wr;
+	assign r2 = !mreq && !rd;
+	assign w2 = !mreq && !wr;
 
 //--- cpu -----------------------------------------------------------------------------------------
 
