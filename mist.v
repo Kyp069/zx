@@ -24,6 +24,9 @@ module mist
 	input  wire       b,
 	input  wire       i,
 
+	input  wire[ 7:0] midiQ,
+	input  wire       midiS,
+
 	output wire[63:0] status,
 
 	output wire[ 1:0] sync,
@@ -88,7 +91,7 @@ module mist
 	wire       sdConf;
 	wire       sdSdhc;
 	wire       sdAckCf;
-	wire[ 8:0] sdBuffA;
+	wire[16:0] sdBuffA;
 	wire[ 7:0] sdBuffD;
 	wire[ 7:0] sdBuffQ;
 	wire       sdBuffW;
@@ -97,7 +100,7 @@ module mist
 
 	wire novga;
 
-	user_io #(.STRLEN(149), .SD_IMAGES(1), .FEATURES(32'h2000)) user_io
+	user_io #(.STRLEN(149), .SD_IMAGES(1), .SERIAL_CHANNEL(1), .FEATURES(32'h2000)) user_io
 	(
 		.conf_str        (confStr),
 		.conf_addr       (       ),
@@ -122,6 +125,7 @@ module mist
 		.sd_ack_conf     (sdAckCf),
 		.sd_ack_x        (),
 		.sd_lba          (sdLba  ),
+		.sd_cnt          (8'd0   ),
 		.sd_conf         (sdConf ),
 		.sd_sdhc         (sdSdhc ),
 		.sd_buff_addr    (sdBuffA),
@@ -164,8 +168,8 @@ module mist
 		.i2c_din         (8'hFF),
 		.i2c_ack         (1'b0 ),
 		.i2c_end         (1'b0 ),
-		.serial_data     (8'd0),
-		.serial_strobe   (1'd0),
+		.serial_data     (midiQ),
+		.serial_strobe   (midiS),
 		.joystick_analog_0(),
 		.joystick_analog_1(),
 		.scandoubler_disable(novga)
@@ -226,7 +230,7 @@ module mist
 		.sd_conf     (sdConf ),
 		.sd_sdhc     (sdSdhc ),
 		.sd_ack_conf (sdAckCf),
-		.sd_buff_addr(sdBuffA),
+		.sd_buff_addr(sdBuffA[8:0]),
 		.sd_buff_din (sdBuffD),
 		.sd_buff_dout(sdBuffQ),
 		.sd_buff_wr  (sdBuffW),
