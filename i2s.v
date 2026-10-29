@@ -39,7 +39,7 @@ module i2s_decoder
 
 	input  wire       ck,
 	input  wire       ws,
-	input  wire       sd
+	input  wire       d
 );
 //-------------------------------------------------------------------------------------------------
 
@@ -48,23 +48,22 @@ always @(posedge clock) cks <= { cks[0], ck };
 
 //-------------------------------------------------------------------------------------------------
 
-reg ckd;
-wire ckp = cks[1] && !ckd;
-always @(posedge clock) ckd <= cks[1];
+reg ckd, ckn, ckp;
+always @(posedge clock) begin ckd <= cks[1]; ckn <= !cks[1] && ckd; ckp <= cks[1] && !ckd; end
 
-reg lrd;
-wire lrp = ws != lrd;
-always @(posedge clock) if(ckp) lrd <= ws;
+reg wsd, wst;
+always @(posedge clock) if(ckn) begin wsd <= ws; wst = ws != wsd; end
 
 //-------------------------------------------------------------------------------------------------
 
 reg[16:0] sr = 17'd1;
-always @(posedge clock) if(ckp) begin
-	if(lrp) begin
-		sr <= 17'd1;
-		if(lrd) right <= sr[15:0]; else left <= sr[15:0];
-	end
-	else if(!sr[16]) sr <= { sr[15:0], sd };
+always @(posedge clock) begin
+	if(ckp) if(!sr[16]) sr <= { sr[15:0], d };
+	if(ckn)
+		if(wst) begin
+			sr <= 17'd1;
+			if(ws) right <= sr[15:0]; else left <= sr[15:0];
+		end
 end
 
 //-------------------------------------------------------------------------------------------------

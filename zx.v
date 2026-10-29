@@ -183,7 +183,7 @@ module zx
 	assign a2 = a[15:14] ? { 2'd2, ramPage, a[13:0] } : mapped && ramcs ? { 2'd1, page, a[12:0] } : { 2'd0, romPage, a[13:0] };
 	assign d2 = q;
 	assign r2 = !mreq && !rd;
-	assign w2 = !mreq && !wr;
+	assign w2 = !mreq && !wr && (a[15:14] || (mapped && a[13]));
 
 //--- cpu -----------------------------------------------------------------------------------------
 
