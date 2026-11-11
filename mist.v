@@ -42,9 +42,7 @@ module mist
 	output reg [ 7:0] xaxis,
 	output reg [ 7:0] yaxis,
 
-	output wire       romIo,
-	output wire       tzxIo,
-	output wire[31:0] dioSz,
+	output wire       dioE,
 	output wire[26:0] dioA,
 	output wire[ 7:0] dioD,
 	output wire       dioW,
@@ -52,25 +50,30 @@ module mist
 	input  wire       sdcCs,
 	input  wire       sdcCk,
 	input  wire       sdcMosi,
-	output wire       sdcMiso
-);
-//--- confStr -------------------------------------------------------------------------------------
+	output wire       sdcMiso,
 
-	localparam confStr =
+	input  wire       tapePlay,
+	input  wire       tapeStop,
+	output wire       tapeBusy,
+	output wire       tapeEar
+);
+//--- confstr -------------------------------------------------------------------------------------
+
+	localparam confstr =
 	{
 		"ZX;;",
-		"O4,DivMMC,On,Off;",
-		"S0U,VHD,Mount SD;",
-		"-;",
-		"O5,Tape sound,On,Off;",
-		"F1,TZX,Load TZX;",
-		"-;",
 		"F0,ROM,Load ROM;",
-		"O3,Model,48K,128K;",
+		"O2,Model,48K,128K;",
 		"-;",
-		"T1,Reset;",
-		"T2,NMI;",
-		"V,V2.0,2026.01.23;",
+		"S0U,VHD,Mount SD;",
+		"S1U,TZXTAPPZX,Mount tape;",
+		"-;",
+		"O3,DivMMC,On,Off;",
+		"O4,Tape sound,Off,On;",
+		"-;",
+		"T0,Reset;",
+		"T1,NMI;",
+		"V,V2.0,2026.11.10;",
 	};
 
 //--- user io--------------------------------------------------------------------------------------
@@ -83,26 +86,28 @@ module mist
 	wire[ 7:0] mouse_flags;
 	wire       mouse_strobe;
 
-	wire       sdRd;
-	wire       sdWr;
-	wire       sdAck;
-	wire[31:0] sdLba;
+	wire[ 1:0] sdRd;
+	wire[ 1:0] sdWr;
+	wire       sdAck = sdAckAll && !sdAckX[1];
+	wire[ 1:0] sdAckX;
+	wire       sdAckCf;
+	wire       sdAckAll;
+	wire[31:0] sdLba = sdRd[1] ? tapeLba : sdcLba;
 	wire       sdBusy;
 	wire       sdConf;
 	wire       sdSdhc;
-	wire       sdAckCf;
 	wire[16:0] sdBuffA;
 	wire[ 7:0] sdBuffD;
 	wire[ 7:0] sdBuffQ;
 	wire       sdBuffW;
-	wire       imgMntd;
+	wire[ 1:0] imgMntd;
 	wire[63:0] imgSize;
 
 	wire novga;
 
-	user_io #(.STRLEN(149), .SD_IMAGES(1), .SERIAL_CHANNEL(1), .FEATURES(32'h2000)) user_io
+	user_io #(.STRLEN(158), .SD_IMAGES(2), .SERIAL_CHANNEL(1), .FEATURES(32'h2000)) user_io
 	(
-		.conf_str        (confStr),
+		.conf_str        (confstr),
 		.conf_addr       (       ),
 		.conf_chr        (8'd0   ),
 		.clk_sys         (clock  ),
@@ -121,11 +126,11 @@ module mist
 		.ps2_mouse_data_i(1'b0),
 		.sd_rd           (sdRd   ),
 		.sd_wr           (sdWr   ),
-		.sd_ack          (sdAck  ),
+		.sd_ack          (sdAckAll),
 		.sd_ack_conf     (sdAckCf),
-		.sd_ack_x        (),
+		.sd_ack_x        (sdAckX ),
+		.sd_cnt          (8'd0),
 		.sd_lba          (sdLba  ),
-		.sd_cnt          (8'd0   ),
 		.sd_conf         (sdConf ),
 		.sd_sdhc         (sdSdhc ),
 		.sd_buff_addr    (sdBuffA),
@@ -177,9 +182,6 @@ module mist
 
 //--- data io--------------------------------------------------------------------------------------
 
-	wire      dioEn;
-	wire[7:0] dioIx;
-
 	data_io	data_io
 	(
 		.clk_sys       (clock  ),
@@ -189,9 +191,9 @@ module mist
 		.SPI_DI        (spiMosi),
 		.SPI_DO        (spiMiso),
 		.clkref_n      (1'b0   ),
-		.ioctl_filesize(dioSz  ),
-		.ioctl_download(dioEn  ),
-		.ioctl_index   (dioIx  ),
+		.ioctl_filesize(       ),
+		.ioctl_download(dioE   ),
+		.ioctl_index   (       ),
 		.ioctl_addr    (dioA   ),
 		.ioctl_din     (8'd0   ),
 		.ioctl_dout    (dioD   ),
@@ -219,14 +221,16 @@ module mist
 
 //---sd card --------------------------------------------------------------------------------------
 
+	wire[31:0] sdcLba;
+
 	sd_card sd_card
 	(
 		.clk_sys     (clock  ),
-		.sd_rd       (sdRd   ),
-		.sd_wr       (sdWr   ),
+		.sd_rd       (sdRd[0]),
+		.sd_wr       (sdWr[0]),
 		.sd_ack      (sdAck  ),
-		.sd_lba      (sdLba  ),
-		.sd_busy     (sdBusy ),
+		.sd_lba      (sdcLba ),
+		.sd_busy     (       ),
 		.sd_conf     (sdConf ),
 		.sd_sdhc     (sdSdhc ),
 		.sd_ack_conf (sdAckCf),
@@ -234,13 +238,38 @@ module mist
 		.sd_buff_din (sdBuffD),
 		.sd_buff_dout(sdBuffQ),
 		.sd_buff_wr  (sdBuffW),
-		.img_mounted (imgMntd),
+		.img_mounted (imgMntd[0]),
 		.img_size    (imgSize),
 		.allow_sdhc  (1'b1   ),
 		.sd_cs       (sdcCs  ),
 		.sd_sck      (sdcCk  ),
 		.sd_sdi      (sdcMosi),
 		.sd_sdo      (sdcMiso)
+	);
+
+//--- tape ----------------------------------------------------------------------------------------
+
+	wire[31:0] tapeLba;
+
+	tape_sd #(.MS(56000), .TS(16)) tape_sd
+	(
+		.clock       (clock   ),
+		.img_mounted (imgMntd[1]),
+		.img_size    (imgSize[31:0]),
+		.sd_lba      (tapeLba ),
+		.sd_rd       (sdRd[1] ),
+		.sd_ack      (sdAckX[1]),
+		.sd_buff_addr(sdBuffA[8:0]),
+		.sd_buff_dout(sdBuffQ ),
+		.sd_buff_wr  (sdBuffW ),
+		.play        (tapePlay),
+		.stop        (tapeStop),
+		.stop48      (1'b0    ),
+		.busy        (tapeBusy),
+		.tape        (tapeEar ),
+		.isPzx       (        ),
+		.isTap       (        ),
+		.loading     (        )
 	);
 
 //--- osd -----------------------------------------------------------------------------------------
@@ -285,9 +314,6 @@ module mist
 	// assign sync = { 1'b1, ~(hsync^vsync) };
 
 //-------------------------------------------------------------------------------------------------
-
-	assign romIo = dioEn && dioIx[5:0] == 0;
-	assign tzxIo = dioEn && dioIx[5:0] == 1;
 
 	assign joy1 = joystick_1[7:0];
 	assign joy2 = joystick_2[7:0];

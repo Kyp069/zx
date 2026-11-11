@@ -17,6 +17,7 @@ module zx
 
 	output wire[13:0] a1,
 	input  wire[ 7:0] q1,
+	output wire       w1,
 
 	output wire[18:0] a2,
 	output wire[ 7:0] d2,
@@ -107,8 +108,6 @@ module zx
 		.i      (i      )
 	);
 
-	assign a1 = { data7FFD[3], va[12:7], !rfsh && !a[15] && a[14] ? a[6:0] : va[6:0] };
-
 //--- turbosound ----------------------------------------------------------------------------------
 
 	wire[ 7:0] tbsQ;
@@ -179,6 +178,9 @@ module zx
 
 	wire[2:0] romPage = mapped ? 3'd4 : { 1'b0, model, data7FFD[4] };
 	wire[2:0] ramPage = a[15] ? (a[14] ? data7FFD[2:0] : 3'd2) : 3'd5;
+
+	assign a1 = { data7FFD[3], va[12:7], !rfsh && !a[15] && a[14] ? a[6:0] : va[6:0] };
+	assign w1 = w2 && a2[18:17] == 2 && a2[16] && a2[14] && !a2[13];
 
 	assign a2 = a[15:14] ? { 2'd2, ramPage, a[13:0] } : mapped && ramcs ? { 2'd1, page, a[12:0] } : { 2'd0, romPage, a[13:0] };
 	assign d2 = q;
